@@ -26,7 +26,7 @@ const formatDate = date =>
 const graphql = String.raw
 
 // the delay argument is for faking things out a bit
-function fetchPokemon(name, delay = 1500) {
+async function fetchPokemon(name, delay = 1500) {
   const endTime = Date.now() + delay
   const pokemonQuery = graphql`
     query PokemonInfo($name: String) {
@@ -46,37 +46,32 @@ function fetchPokemon(name, delay = 1500) {
     }
   `
 
-  return window
-    .fetch('https://graphql-pokemon2.vercel.app', {
-      // learn more about this API here: https://graphql-pokemon2.vercel.app
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        query: pokemonQuery,
-        variables: {name: name.toLowerCase()},
-      }),
-    })
-    .then(response => response.json())
-    .then(async response => {
-      await sleep(endTime - Date.now())
-      return response
-    })
-    .then(response => {
-      if (response.errors) {
-        return Promise.reject(
-          new Error(response.errors.map(e => e.message).join('\n')),
-        )
-      }
-      const pokemon = response.data.pokemon
-      if (pokemon) {
-        pokemon.fetchedAt = formatDate(new Date())
-        return pokemon
-      } else {
-        return Promise.reject(new Error(`No pokemon with the name "${name}"`))
-      }
-    })
+  const response = await window.fetch('https://graphql-pokemon2.vercel.app', {
+    // learn more about this API here: https://graphql-pokemon2.vercel.app
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      query: pokemonQuery,
+      variables: {name: name.toLowerCase()},
+    }),
+  })
+  const response_1 = await response.json()
+  await sleep(endTime - Date.now())
+  const response_2 = await response_1
+  if (response_2.errors) {
+    return Promise.reject(
+      new Error(response_2.errors.map(e => e.message).join('\n')),
+    )
+  }
+  const pokemon = response_2.data.pokemon
+  if (pokemon) {
+    pokemon.fetchedAt = formatDate(new Date())
+    return pokemon
+  } else {
+    return Promise.reject(new Error(`No pokemon with the name "${name}"`))
+  }
 }
 
 function getImageUrlForPokemon(pokemonName) {
