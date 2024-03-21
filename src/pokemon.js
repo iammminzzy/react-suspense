@@ -280,7 +280,9 @@ function PokemonErrorBoundary(parentProps) {
   const canReset = Boolean(parentProps.onReset || parentProps.resetKeys)
   return (
     <ErrorBoundary
-      fallbackRender={props => <ErrorFallback canReset={canReset} {...props} />}
+      fallbackRender={props => {
+        return <ErrorFallback canReset={canReset} {...props} />
+      }}
       {...parentProps}
     />
   )
